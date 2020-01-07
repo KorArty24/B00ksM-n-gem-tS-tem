@@ -13,22 +13,24 @@ namespace AspNetCorePublisherWebAPI.Services
     public class BookstoreSqlRepository: IBookstoreRepository
     {
         private SqlDbContext _db;
-        
-        public BookstoreSqlRepository(SqlDbContext db)
+        private readonly IMapper _mapper;
+
+        public BookstoreSqlRepository(SqlDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
         public void AddBook(BookDTO book)
         {
             
-            var bookToAdd = Mapper.Map<Book>(book);
+            var bookToAdd = _mapper.Map<Book>(book);
             _db.Books.Add(bookToAdd);
         }
 
         public void AddPublisher(PublisherDTO publisher)
         {
-            var publisherToAdd = Mapper.Map<Publisher>(publisher);
+            var publisherToAdd = _mapper.Map<Publisher>(publisher);
             _db.Publishers.Add(publisherToAdd);
 
         }
@@ -48,14 +50,14 @@ namespace AspNetCorePublisherWebAPI.Services
         public BookDTO GetBook(int publisherId, int bookId)
         {
             var book = _db.Books.FirstOrDefault(b => b.Id.Equals(bookId) && b.PublisherId.Equals(publisherId));
-            var bookDTO = Mapper.Map<BookDTO>(book);
+            var bookDTO = _mapper.Map<BookDTO>(book);
             return bookDTO;
         }
 
         public IEnumerable<BookDTO> GetBooks(int publisherId)
         {
             var books = _db.Books.Where(b => b.PublisherId.Equals(publisherId));
-            var BookDTOs = Mapper.Map<IEnumerable<BookDTO>>(books);
+            var BookDTOs = _mapper.Map<IEnumerable<BookDTO>>(books);
             return BookDTOs;
         }
 
@@ -65,13 +67,13 @@ namespace AspNetCorePublisherWebAPI.Services
             if (includeBooks && publisher != null) {
             _db.Entry(publisher).Collection(c=>c.Books).Load(); 
             }
-            var publisherDTO = Mapper.Map<PublisherDTO>(publisher);
+            var publisherDTO = _mapper.Map<PublisherDTO>(publisher);
                 return publisherDTO;
         }
 
         public IEnumerable<PublisherDTO> GetPublishers()
         {
-            return Mapper.Map<IEnumerable<PublisherDTO>>(_db.Publishers);
+            return _mapper.Map<IEnumerable<PublisherDTO>>(_db.Publishers);
         }
 
         public bool PublisherExists(int publisherId)
